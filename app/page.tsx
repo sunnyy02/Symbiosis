@@ -19,16 +19,15 @@ export default function Home() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/generate?primary=${primary}&secondary=${secondary}`);
-      if (!response.ok) throw new Error('Failed to generate idea');
-      const data = await response.json();
+      // Direct client-side call instead of API route for static export
+      const { getProjectByCombo } = await import('@/lib/projects');
+      const data = await getProjectByCombo(primary, secondary);
       setProject(data);
     } catch (error) {
       console.error('Error generating idea:', error);
       // Fallback: Use a random project from our data
-      const response = await fetch('/projects.json');
-      const data = await response.json();
-      const randomProject = data.projects[Math.floor(Math.random() * data.projects.length)];
+      const { getRandomProject } = await import('@/lib/projects');
+      const randomProject = await getRandomProject();
       setProject(randomProject);
     }
     setIsLoading(false);

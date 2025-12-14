@@ -1,6 +1,4 @@
 import { Project } from "@/types";
-import fs from "fs/promises";
-import path from "path";
 
 let cachedProjects: Project[] | null = null;
 
@@ -10,9 +8,15 @@ export async function loadProjects(): Promise<Project[]> {
   }
 
   try {
-    const filePath = path.join(process.cwd(), "public", "projects.json");
-    const fileContent = await fs.readFile(filePath, "utf-8");
-    const data = JSON.parse(fileContent);
+    // Determine base path for GitHub Pages
+    const isProd = process.env.NODE_ENV === 'production';
+    const basePath = isProd ? '/Symbiosis' : '';
+    
+    const response = await fetch(`${basePath}/projects.json`);
+    if (!response.ok) {
+      throw new Error("Failed to load projects");
+    }
+    const data = await response.json();
     cachedProjects = data.projects;
     return cachedProjects || [];
   } catch (error) {
